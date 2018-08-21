@@ -10,3 +10,7 @@
 .gitignore
 /pySAHM/Resources/R_Modules/Experimental/*
 /pySAHM/Resources/R_Modules/OldCopies/*
+/pySAHM/Resources/R_Modules/Testing/*
+*.Rproj
+.Rproj.user
+.Rhistory
