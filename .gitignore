@@ -1,6 +1,9 @@
 *.pyc
 *~
 ~*
+.Rhistory
+.Rproj.user/
+*.Rproj
 *.DS_Store
 .project
 .idea
