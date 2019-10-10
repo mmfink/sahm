@@ -1,39 +1,3 @@
-#  -*- coding: latin-1 -*-
-###############################################################################
-# This file is part of the Software for Assisted Habitat Modeling (SAHM) package
-# developed by the U.S. Geological Survey Fort Collins Science Center.
-# It is intended to be used in the VisTrails Scientific
-# VisTrails was developed by New York University (2014-2016), NYU-Poly (2011-2014),
-# University of Utah (2006-2011).  VisTrails Contact: contact@vistrails.org
-#
-# SAHM Contact: talbertc@usgs.gov
-#
-# --------------------------------------------------------------------------------
-# U.S. Geological Survey Disclaimers
-# Any use of trade, product or firm names is for descriptive purposes only and does
-# not imply endorsement by the U.S. Geological Survey.
-#
-# Although this information product, for the most part, is in the public domain,
-# it also contains copyrighted material as noted in the text. Permission to reproduce
-# copyrighted items for other than personal use must be secured from the copyright owner.
-#
-# Although these data have been processed successfully on a computer system at the
-# U.S. Geological Survey, no warranty, expressed or implied is made regarding the
-# display or utility of the data on any other system, or for general or scientific
-# purposes, nor shall the act of distribution constitute any such warranty. The
-# U.S. Geological Survey shall not be held liable for improper or incorrect use
-# of the data described and/or contained herein.
-#
-# Although this program has been used by the U.S. Geological Survey (USGS), no
-# warranty, expressed or implied, is made by the USGS or the U.S. Government as
-# to the accuracy and functioning of the program and related program material nor
-# shall the fact of distribution constitute any such warranty, and no responsibility
-# is assumed by the USGS in connection therewith.
-# --------------------------------------------------------------------------------
-#
-# This code is in the public domain and is licensed under Creative Commons CC0 1.0 Universal
-#
-###############################################################################
 
 import sys, os
 import csv
@@ -61,9 +25,9 @@ def main(args):
     ourLittleWorker.run()
     
 class rasterProcessor(object):
-    """The base class that all other Raster processing
+    '''The base class that all other Raster processing
     objects will inherit from
-    """
+    '''
     def __init__(self):
         #instance level variables
         self.verbose = True
@@ -89,8 +53,8 @@ class rasterProcessor(object):
             raise utilities.TrappedError("Specified Output directory " + self.outDir + " is not a directory")
      
         if self.logger is None:
-            self.logger = utilities.Logger(self.outDir, self.verbose)
-        self.writetolog = self.logger.write_to_log
+            self.logger = utilities.logger(self.outDir, self.verbose)
+        self.writetolog = self.logger.writetolog
 
         # Validate template image.
         if not SpatialUtilities.isRaster(self.inputFname):
@@ -104,7 +68,7 @@ class rasterProcessor(object):
         self.inputRaster = SpatialUtilities.SAHMRaster(self.inputFname)
     
 class rasterReclassifier(rasterProcessor):
-    """produces an output raster that has been reclassified according to
+    '''produces an output raster that has been reclassified according to 
     a reclass text file provided.
     The format of this file conforms to the ESRI reclass by asci form
     Information available at: http://resources.arcgis.com/en/help/main/10.1/index.html#//00q90000003w000000
@@ -112,7 +76,7 @@ class rasterReclassifier(rasterProcessor):
     Values not specified in the reclass file will remain unchanged.
     No Data values are specified in both the input and output line with a NoData string
     
-    """
+    '''
     def __init__(self):
         rasterProcessor.__init__(self)
         #template is optional and is only used to specify extent
@@ -165,13 +129,13 @@ class rasterReclassifier(rasterProcessor):
         self.reclassDict = self.loadReclassDict(self.reclassFName)
            
     def loadReclassDict(self, reclassFName):
-        """loads our reclass File into a dictionary for latter processing
+        '''loads our reclass File into a dictionary for latter processing
         the reclass file is the same format as that used by ESRI:
         see http://help.arcgis.com/en/arcgisdesktop/10.0/help/index.html#/How_Reclass_By_ASCII_File_works/009z000000t3000000/
         the dictionary is in the format
         {(oldVal,):newVal,
         (minOldVal, maxOldVal):newVal}
-        """
+        '''
         outDict = {}
         reclassFile = open(reclassFName, "r")
         for line in reclassFile.readlines():

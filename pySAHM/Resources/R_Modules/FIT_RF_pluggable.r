@@ -71,7 +71,7 @@ seed=NULL
 MESS=FALSE
 xtest=NULL
 ytest=NULL
-multCore=TRUE
+# multCore=TRUE
 
 Args <- commandArgs(trailingOnly=FALSE)
 

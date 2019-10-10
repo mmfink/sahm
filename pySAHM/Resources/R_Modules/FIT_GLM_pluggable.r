@@ -53,7 +53,7 @@ simp.method="AIC"
 opt.methods=2
 MESS=FALSE
 squared.terms=TRUE
-multCore=TRUE
+# multCore=TRUE
 predSelect=TRUE
 
 Args <- commandArgs(trailingOnly=FALSE)

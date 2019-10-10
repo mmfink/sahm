@@ -41,6 +41,9 @@
 ## Any use of trade, firm, or product names is for descriptive purposes only 
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
+##
+## 10/18/18: [P. Engelstad] Function now generates AUCPR plot and adds AUCPR values to captured eval stats
+
 
 make.auc.plot.jpg<-function(out=out){
  
@@ -79,7 +82,7 @@ make.auc.plot.jpg<-function(out=out){
 #################### Variable importance plots #####################
 
     if(length(out$mods$vnames)>1 & out$input$model.family!="poisson"){
-      png(paste(out$dat$bname,"_variable.importance.png",sep=""),height=1000,width=1000)  
+      png(paste(out$dat$bname,"_variable.importance.png",sep=""),height=1000,width=1000, pointsize=13)  
         VariableImportance(out$input$script.name,out=out,auc=lapply(Stats,"[",9)) 
       graphics.off()
     }    
@@ -147,6 +150,13 @@ make.auc.plot.jpg<-function(out=out){
                  }
                 }
                 graphics.off()
+    ## AUCPR Plots
+            png(file=paste(out$dat$bname,"_AUCPR_Plot.png",sep=""))
+            pr_tmp = pr.curve(scores.class0 = Stats$train$auc.data$pred
+                                 , weights.class0 = Stats$train$auc.data$pres.abs
+                                 ,curve = TRUE)
+            plot(pr_tmp, lwd=3, cex.main=1.25, cex.lab=1.25, cex.axis = 1.25)
+            graphics.off()
 
             #I'm pretty sure calibration plots should work for count data as well but I'm not quite ready to make a plot
            png(file=calib.plot,height=1000,width=1000,pointsize=20)
@@ -223,8 +233,8 @@ make.auc.plot.jpg<-function(out=out){
                         
                        if(out$input$model.family%in%c("binomial","bernoulli")){
                            csv.stats<-lapply(Stats,function(lst){
-                               return(c("","",lst$correlation,lst$pct.dev.exp,lst$Pcc,lst$auc.fit,lst$Tss))})
-                            stat.names<-c("Correlation Coefficient","Percent Deviance Explained","Percent Correctly Classified","AUC","True Skill Stat")
+                               return(c("","",lst$correlation,lst$pct.dev.exp,lst$Pcc,lst$auc.fit,lst$auc.pr,lst$Tss))})
+                            stat.names<-c("Correlation Coefficient","Percent Deviance Explained","Percent Correctly Classified","AUC","AUCPR","True Skill Stat")
                         } else{
                         csv.stats<-lapply(Stats,function(lst){
                             return(c("","",lst$correlation,lst$pct.dev.exp,lst$prediction.error/100))})

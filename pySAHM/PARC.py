@@ -1,38 +1,46 @@
-#  -*- coding: latin-1 -*-
+#!/usr/bin/python
 ###############################################################################
-# This file is part of the Software for Assisted Habitat Modeling (SAHM) package
-# developed by the U.S. Geological Survey Fort Collins Science Center.
-# It is intended to be used in the VisTrails Scientific
-# VisTrails was developed by New York University (2014-2016), NYU-Poly (2011-2014),
-# University of Utah (2006-2011).  VisTrails Contact: contact@vistrails.org
-#
-# SAHM Contact: talbertc@usgs.gov
-#
-# --------------------------------------------------------------------------------
-# U.S. Geological Survey Disclaimers
-# Any use of trade, product or firm names is for descriptive purposes only and does
-# not imply endorsement by the U.S. Geological Survey.
-#
-# Although this information product, for the most part, is in the public domain,
-# it also contains copyrighted material as noted in the text. Permission to reproduce
-# copyrighted items for other than personal use must be secured from the copyright owner.
-#
-# Although these data have been processed successfully on a computer system at the
-# U.S. Geological Survey, no warranty, expressed or implied is made regarding the
-# display or utility of the data on any other system, or for general or scientific
-# purposes, nor shall the act of distribution constitute any such warranty. The
-# U.S. Geological Survey shall not be held liable for improper or incorrect use
-# of the data described and/or contained herein.
-#
-# Although this program has been used by the U.S. Geological Survey (USGS), no
-# warranty, expressed or implied, is made by the USGS or the U.S. Government as
-# to the accuracy and functioning of the program and related program material nor
-# shall the fact of distribution constitute any such warranty, and no responsibility
-# is assumed by the USGS in connection therewith.
-# --------------------------------------------------------------------------------
-#
-# This code is in the public domain and is licensed under Creative Commons CC0 1.0 Universal
-#
+#  #
+#  # Copyright (C) 2010-2012, USGS Fort Collins Science Center.
+#  # All rights reserved.
+#  # Contact: talbertc@usgs.gov
+#  #
+#  # This file is part of the Software for Assisted Habitat Modeling package
+#  # for VisTrails.
+#  #
+#  # "Redistribution and use in source and binary forms, with or without
+#  # modification, are permitted provided that the following conditions are met:
+#  #
+#  #  - Redistributions of source code must retain the above copyright notice,
+#  #    this list of conditions and the following disclaimer.
+#  #  - Redistributions in binary form must reproduce the above copyright
+#  #    notice, this list of conditions and the following disclaimer in the
+#  #    documentation and/or other materials provided with the distribution.
+#  #  - Neither the name of the University of Utah nor the names of its
+#  #    contributors may be used to endorse or promote products derived from
+#  #    this software without specific prior written permission.
+#  #
+#  # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+#  # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#  # PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+#  # CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  # EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  # PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+#  # OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+#  # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+#  # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+#  # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+#  #
+#  # Although this program has been used by the U.S. Geological Survey (USGS),
+#  # no warranty, expressed or implied, is made by the USGS or the
+#  # U.S. Government as to the accuracy and functioning of the program and
+#  # related program material nor shall the fact of distribution constitute
+#  # any such warranty, and no responsibility is assumed by the USGS
+#  # in connection therewith.
+#  #
+#  # Any use of trade, firm, or product names is for descriptive purposes only
+#  # and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
 import os
@@ -82,12 +90,12 @@ def main(args_in):
     our_PARC.inputs_CSV = options.inputs_CSV
     our_PARC.multicores = options.multicore
     our_PARC.ignoreNonOverlap = options.ignoreNonOverlap
-    our_PARC.logger = utilities.Logger(os.path.join(our_PARC.out_dir,
+    our_PARC.logger = utilities.logger(os.path.join(our_PARC.out_dir,
                                                     "logfile.txt"), True)
     our_PARC.parcFiles()
 
 class PARC(object):
-    """
+    '''
      PARC:  Project, Aggregate, Resample, Clip
       The workflow on this beast is as follows:
             For each dataset
@@ -99,7 +107,7 @@ class PARC(object):
                 setting.
             Step 2: Aggregate the tmpRaster to have the same origin,
                 cell size and extent as our template.
-    """
+    '''
 
     def __init__(self):
         #  instance level variables
@@ -120,22 +128,22 @@ class PARC(object):
         self.pool_processes = []
 
     def parcFiles(self):
-        """
+        '''
             1: Parse the inputs_CSV into our inputs list
             2: Make sure all of our instance variables are good and proper
             3: Loop through the list of sourceImages and PARC each one.
             4: The outputs will be stored in the output directory
             5: Additionally an output CSV will be produced that lists the
             inputs, parameters used, and outputs
-        """
+        '''
 
-        self.logger.write_to_log("Starting PARC", True, True)
+        self.logger.writetolog("Starting PARC", True, True)
         self.validateArgs()
-        self.logger.write_to_log("    Arguments validated successfully",
-                                 True, True)
+        self.logger.writetolog("    Arguments validated successfully",
+                               True, True)
         self.processFiles()
 
-        self.logger.write_to_log("Finished PARC", True, True)
+        self.logger.writetolog("Finished PARC", True, True)
 
     def processFiles(self):
         self.process_pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
@@ -168,12 +176,12 @@ class PARC(object):
                             " already exists, but was derived from a different source."
 
                         msg += " renaming output to {}".format(out_file)
-                        self.logger.write_to_log(msg, True, True)
+                        self.logger.writetolog(msg, True, True)
                         process_queue.append(self.gen_singlePARC_thread(image, out_file))
                     else:
                         msg = "The output " + in_fname + \
                             " already exists. \tSkipping this file."
-                        self.logger.write_to_log(msg, True, True)
+                        self.logger.writetolog(msg, True, True)
                 except:
                     #  we bombed trying to open the outFile with gdal. Lets rerun it.
                     process_queue.append(self.gen_singlePARC_thread(image, out_file))
@@ -230,7 +238,7 @@ class PARC(object):
         pyEx = sys.executable
         command_arr = [pyEx, executable] + args
         command = ' '.join(command_arr)
-        self.logger.write_to_log(command, False, False)
+        self.logger.writetolog(command, False, False)
         return command_arr
 
     def log_result(self, result):
@@ -243,7 +251,7 @@ class PARC(object):
         gdal.UseExceptions()
 
         short_name = os.path.split(os.path.splitext(source[0])[0])[1]
-        self.logger.write_to_log("    Starting processing of " + source[0])
+        self.logger.writetolog("    Starting processing of " + source[0])
         source_raster = SpatialUtilities.SAHMRaster(source[0])
 
         gdal_type = self.get_gdal_type_from_string(source[2])
@@ -259,7 +267,7 @@ class PARC(object):
         if cell_ratio > 0.5:
             #  The source cell size is close enough to our template cell size,
             #  or smaller so that all we need to do is reproject and resample.
-            self.logger.write_to_log("  cell ratio > .5: reprojecting and resampling to template parameters only")
+            self.logger.writetolog("  cell ratio > .5: reprojecting and resampling to template parameters only")
             SpatialUtilities.intermediaryReprojection(source_raster,
                             self.templateRaster, dest, gdal_type, True)
         else:
@@ -290,12 +298,12 @@ class PARC(object):
                 pass
 
     def get_gdal_type_from_string(self, gdal_gra_description):
-        """Returns a gdal resampling type based on the string passed
+        '''Returns a gdal resampling type based on the string passed
         gdal_GRA_description must be one of: nearestneighbor, bilinear,
         cubic, cubicspline, or lanczos.
         Otherwise will default and return nearestneighbor
         Note gdal_GRA_description is not case sensitive
-        """
+        '''
         gdal_type = None
         if gdal_gra_description.lower() == "nearestneighbor":
             gdal_type = gdalconst.GRA_NearestNeighbour
@@ -308,8 +316,8 @@ class PARC(object):
         if gdal_gra_description.lower() == "lanczos":
             gdal_type = gdalconst.GRA_Lanczos
         if gdal_type == None:
-            self.logger.write_to_log("   Specified resampling method ("
-                                     + gdal_gra_description + ") not one of 'NearestNeighbor', " +
+            self.logger.writetolog("   Specified resampling method ("
+                + gdal_gra_description + ") not one of 'NearestNeighbor', " +
                 "'Bilinear', 'Cubic', 'CubicSpline', or 'Lanczos'.  " +
                 "Defaulting to 'NearestNeighbor'")
             gdal_type = gdalconst.GRA_NearestNeighbour
@@ -495,8 +503,8 @@ class PARC(object):
             raise utilities.TrappedError("Specified Output directory " + self.out_dir + " is not a directory")
 
         if self.logger is None:
-            self.logger = utilities.Logger(self.out_dir, self.verbose)
-        self.writetolog = self.logger.write_to_log
+            self.logger = utilities.logger(self.out_dir, self.verbose)
+        self.writetolog = self.logger.writetolog
 
         #  Validate template image.
         if self.template is None:

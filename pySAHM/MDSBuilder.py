@@ -1,38 +1,45 @@
-#  -*- coding: latin-1 -*-
 ###############################################################################
-# This file is part of the Software for Assisted Habitat Modeling (SAHM) package
-# developed by the U.S. Geological Survey Fort Collins Science Center.
-# It is intended to be used in the VisTrails Scientific
-# VisTrails was developed by New York University (2014-2016), NYU-Poly (2011-2014),
-# University of Utah (2006-2011).  VisTrails Contact: contact@vistrails.org
-#
-# SAHM Contact: talbertc@usgs.gov
-#
-# --------------------------------------------------------------------------------
-# U.S. Geological Survey Disclaimers
-# Any use of trade, product or firm names is for descriptive purposes only and does
-# not imply endorsement by the U.S. Geological Survey.
-#
-# Although this information product, for the most part, is in the public domain,
-# it also contains copyrighted material as noted in the text. Permission to reproduce
-# copyrighted items for other than personal use must be secured from the copyright owner.
-#
-# Although these data have been processed successfully on a computer system at the
-# U.S. Geological Survey, no warranty, expressed or implied is made regarding the
-# display or utility of the data on any other system, or for general or scientific
-# purposes, nor shall the act of distribution constitute any such warranty. The
-# U.S. Geological Survey shall not be held liable for improper or incorrect use
-# of the data described and/or contained herein.
-#
-# Although this program has been used by the U.S. Geological Survey (USGS), no
-# warranty, expressed or implied, is made by the USGS or the U.S. Government as
-# to the accuracy and functioning of the program and related program material nor
-# shall the fact of distribution constitute any such warranty, and no responsibility
-# is assumed by the USGS in connection therewith.
-# --------------------------------------------------------------------------------
-#
-# This code is in the public domain and is licensed under Creative Commons CC0 1.0 Universal
-#
+#  #
+#  # Copyright (C) 2010-2012, USGS Fort Collins Science Center.
+#  # All rights reserved.
+#  # Contact: talbertc@usgs.gov
+#  #
+#  # This file is part of the Software for Assisted Habitat Modeling package
+#  # for VisTrails.
+#  #
+#  # "Redistribution and use in source and binary forms, with or without
+#  # modification, are permitted provided that the following conditions are met:
+#  #
+#  #  - Redistributions of source code must retain the above copyright notice,
+#  #    this list of conditions and the following disclaimer.
+#  #  - Redistributions in binary form must reproduce the above copyright
+#  #    notice, this list of conditions and the following disclaimer in the
+#  #    documentation and/or other materials provided with the distribution.
+#  #  - Neither the name of the University of Utah nor the names of its
+#  #    contributors may be used to endorse or promote products derived from
+#  #    this software without specific prior written permission.
+#  #
+#  # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+#  # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#  # PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+#  # CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  # EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  # PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+#  # OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+#  # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+#  # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+#  # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+#  #
+#  # Although this program has been used by the U.S. Geological Survey (USGS),
+#  # no warranty, expressed or implied, is made by the USGS or the
+#  # U.S. Government as to the accuracy and functioning of the program and
+#  # related program material nor shall the fact of distribution constitute
+#  # any such warranty, and no responsibility is assumed by the USGS
+#  # in connection therewith.
+#  #
+#  # Any use of trade, firm, or product names is for descriptive purposes only
+#  # and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
 import sys
@@ -50,10 +57,10 @@ import SpatialUtilities
 
 
 class MDSBuilder(object):
-    """Takes a csv with animal location x,y and attributes each with the values
+    '''Takes a csv with animal location x,y and attributes each with the values
     extracted from each of the grids (covariates) indicated in the supplied
     csv list of files
-    """
+    '''
     def __init__(self):
         #  instance level variables
         self.verbose = False
@@ -126,14 +133,14 @@ class MDSBuilder(object):
             raise RuntimeError, "The directory of the supplied MDS output file path, " + self.outputMDS + ", does not appear to exist on the filesystem"
 
         if self.logger is None:
-            self.logger = utilities.Logger(outDir, self.verbose)
-        self.writetolog = self.logger.write_to_log
+            self.logger = utilities.logger(outDir, self.verbose)
+        self.writetolog = self.logger.writetolog
 
     def run(self):
-        """
+        '''
         The main execution method which calls
         each of the processing step functions
-        """
+        '''
 
         self.validateArgs()
         self.writetolog('\nRunning MDSBuilder', True, True)
@@ -165,10 +172,10 @@ class MDSBuilder(object):
             self.writetolog('    The process took {:.1f} seconds'.format(endTime - startTime))
 
     def constructEmptyMDS(self):
-        """Creates the triple header line format of our output file.
+        '''Creates the triple header line format of our output file.
         Also parses the inputs file to append the '_categorical' flag
         to the covariate names of all categorical inputs.
-        """
+        '''
 
         if os.path.exists(self.fieldData):
             fieldDataCSV = csv.reader(open(self.fieldData, "r"))
@@ -269,9 +276,9 @@ class MDSBuilder(object):
         self.templateSurface = SpatialUtilities.SAHMRaster(self.template)
 
     def readInPoints(self):
-        """Loop through each row in our field data and add the X, Y, response
+        '''Loop through each row in our field data and add the X, Y, response
         to our in memory list of rows to write to our output MDS file
-        """
+        '''
         fieldDataCSV = csv.reader(open(self.fieldData, "r"))
         origHeader = fieldDataCSV.next()
         points = []
@@ -288,12 +295,12 @@ class MDSBuilder(object):
         return points
 
     def addBackgroundPoints(self):
-        """Add self.pointCount number of points to the supplied field data
+        '''Add self.pointCount number of points to the supplied field data
         If a probability surface was provided the distribution will
         follow this otherwise it will be uniform within the extent of the
         first of our inputs.
         Each pixel is sampled only once.
-        """
+        '''
         #  determine what value we'll be using (background/pseudoabsense)
         pointval = '-9998'
 
@@ -347,13 +354,13 @@ class MDSBuilder(object):
         del fOut
 
     def pullBackgroundSingly(self, fOut, pointVal):
-        """We need a small proportion of the total pixels.
+        '''We need a small proportion of the total pixels.
         We'll do our sampling without replacement by randomly sampling pixels
         and keeping track of the ones we've tried so we don't retry them.
 
         Each found pixel will be written to a new row in our temp output file
         as it's found.
-        """
+        '''
         if self.probSurface:
             probRaster = self.probSurface
             useProbSurf = True
@@ -601,11 +608,11 @@ class MDSBuilder(object):
             return int(1.0 / ave_prob * self.pointCount * 1.1)
 
     def probSurfaceSanityCheck(self):
-        """ascertain how hard it will be to find the required
+        '''ascertain how hard it will be to find the required
         number of points given the entered probability surface.
 
         return proportion we will have to sample.
-        """
+        '''
 
         #  step2 calculate the expected maximum number of points available
         if self.probSurface is None:

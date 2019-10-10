@@ -1,51 +1,67 @@
-#  -*- coding: latin-1 -*-
+#!/usr/bin/python
 ###############################################################################
-# This file is part of the Software for Assisted Habitat Modeling (SAHM) package
-# developed by the U.S. Geological Survey Fort Collins Science Center.
-# It is intended to be used in the VisTrails Scientific
-# VisTrails was developed by New York University (2014-2016), NYU-Poly (2011-2014),
-# University of Utah (2006-2011).  VisTrails Contact: contact@vistrails.org
-#
-# SAHM Contact: talbertc@usgs.gov
-#
-# --------------------------------------------------------------------------------
-# U.S. Geological Survey Disclaimers
-# Any use of trade, product or firm names is for descriptive purposes only and does
-# not imply endorsement by the U.S. Geological Survey.
-#
-# Although this information product, for the most part, is in the public domain,
-# it also contains copyrighted material as noted in the text. Permission to reproduce
-# copyrighted items for other than personal use must be secured from the copyright owner.
-#
-# Although these data have been processed successfully on a computer system at the
-# U.S. Geological Survey, no warranty, expressed or implied is made regarding the
-# display or utility of the data on any other system, or for general or scientific
-# purposes, nor shall the act of distribution constitute any such warranty. The
-# U.S. Geological Survey shall not be held liable for improper or incorrect use
-# of the data described and/or contained herein.
-#
-# Although this program has been used by the U.S. Geological Survey (USGS), no
-# warranty, expressed or implied, is made by the USGS or the U.S. Government as
-# to the accuracy and functioning of the program and related program material nor
-# shall the fact of distribution constitute any such warranty, and no responsibility
-# is assumed by the USGS in connection therewith.
-# --------------------------------------------------------------------------------
-#
-# This code is in the public domain and is licensed under Creative Commons CC0 1.0 Universal
-#
+#  #
+#  # Copyright (C) 2010-2012, USGS Fort Collins Science Center.
+#  # All rights reserved.
+#  # Contact: talbertc@usgs.gov
+#  #
+#  # This file is part of the Software for Assisted Habitat Modeling package
+#  # for VisTrails.
+#  #
+#  # "Redistribution and use in source and binary forms, with or without
+#  # modification, are permitted provided that the following conditions are met:
+#  #
+#  #  - Redistributions of source code must retain the above copyright notice,
+#  #    this list of conditions and the following disclaimer.
+#  #  - Redistributions in binary form must reproduce the above copyright
+#  #    notice, this list of conditions and the following disclaimer in the
+#  #    documentation and/or other materials provided with the distribution.
+#  #  - Neither the name of the University of Utah nor the names of its
+#  #    contributors may be used to endorse or promote products derived from
+#  #    this software without specific prior written permission.
+#  #
+#  # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+#  # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#  # PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+#  # CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  # EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  # PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+#  # OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+#  # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+#  # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+#  # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+#  #
+#  # Although this program has been used by the U.S. Geological Survey (USGS),
+#  # no warranty, expressed or implied, is made by the USGS or the
+#  # U.S. Government as to the accuracy and functioning of the program and
+#  # related program material nor shall the fact of distribution constitute
+#  # any such warranty, and no responsibility is assumed by the USGS
+#  # in connection therewith.
+#  #
+#  # Any use of trade, firm, or product names is for descriptive purposes only
+#  # and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
-import os
+import os, sys
 import time
 import csv
-import struct
-import datetime
-import decimal
-import itertools
+import string
+import struct, datetime, decimal, itertools
 import pickle
+
 import tempfile
+
+_logfile = ''
+_verbose = False
+
 import subprocess
 import multiprocessing
+
+_process_pool = None
+_pool_processes = []
+
+_roottempdir = ""
 
 from PyQt4 import QtCore, QtGui
 
@@ -56,17 +72,9 @@ except ImportError:
     import sha
     sha_hash = sha.new
 
-_logfile = ''
-_verbose = False
-_process_pool = None
-_pool_processes = []
-
-_roottempdir = ""
-
 mosaicAllTifsInFolder = None
 
-
-class Logger(object):
+class logger(object):
     def __init__(self, logfile, verbose, write_continued=True):
         self.logfile = logfile
         self.verbose = verbose
@@ -77,32 +85,31 @@ class Logger(object):
 
         if os.path.exists(self.logfile):
             if write_continued:
-                self.write_to_log("\nSession continued\n", True, True)
+                self.writetolog("\nSession continued\n", True, True)
         else:
-            log_dname = os.path.split(self.logfile)[0]
-            self.logfile = os.path.join(log_dname, 'sessionLog.txt')
-            if not os.path.exists(log_dname):
-                raise RuntimeError("\n".join([log_dname, self.logfile, 'Directory of specified logfile does not exist.']))
+            logDir = os.path.split(self.logfile)[0]
+            self.logfile = os.path.join(logDir, 'sessionLog.txt')
+            if not os.path.exists(logDir):
+                raise RuntimeError("\n".join([logDir, self.logfile, 'Directory of specified logfile does not exist.']))
             f = open(self.logfile, "a")
             del f
-            self.write_to_log("\nSession started\n", True, False)
+            self.writetolog("\nSession started\n", True, False)
 
-    def write_to_log(self, msg, add_time=False, print_to_screen=True):
-        """
-           Opens the log file and writes the passed msg.
-           Optionally adds a time slot to the message and
-           Prints the msg to the screen.
-           If the logfile is not specified tries to use the global variable.
-        """
+
+    def writetolog(self, msg, addtime=False, printtoscreen=True):
+        '''Opens the log file and writes the passed msg.
+    Optionally adds a time slot to the message and
+    Prints the msg to the screen.
+    If the logfile is not specified tries to use the global variable.
+        '''
         f = open(self.logfile, "a")
-        if self.verbose and print_to_screen:
+        if self.verbose and printtoscreen:
             print msg
-        if add_time:
+        if addtime:
             msg = ' at: '.join([msg, time.strftime("%m/%d/%Y %H:%M")])
         msg = "\n" + msg
         f.write(msg)
         del f
-
 
 class TrappedError(Exception):
     """Exception class indicating that an anticipated problem
@@ -112,9 +119,8 @@ class TrappedError(Exception):
         Exception.__init__(self)
         self.message = msg
 
-
-def is_mds_file(mds_fname):
-    """performs a check to see if a supplied file is in 'MDS' format
+def isMDSFile(MDSFile):
+    '''performs a check to see if a supplied file is in 'MDS' format
     This means:
     1 - The file has three header lines
         first: x, y, responseBinary or responseCount, a series of covariate names, and an optional Split
@@ -129,46 +135,108 @@ def is_mds_file(mds_fname):
     existing on the file system, missing values in any columns, appropriate values in
     the response or Split columns, etc.  Instead this function is intended to just give a
     best guess as to to if this is an MDS.
-    """
-    mds_reader = csv.reader(open(mds_fname, 'r'))
-    header1 = mds_reader.next()
-    header2 = mds_reader.next()
-    header3 = mds_reader.next()
-    del mds_reader
+    '''
+    MDSreader = csv.reader(open(MDSFile, 'r'))
+    header1 = MDSreader.next()
+    header2 = MDSreader.next()
+    header3 = MDSreader.next()
+    del MDSreader
 
     return True
-
 
 def find_key(dic, val):
     """return the key of dictionary dic given the value
     from: http://www.daniweb.com/software-development/python/code/217019"""
     return [k for k, v in dic.iteritems() if v == val][0]
 
+#  parallelization, remote processing, etc utilites
+#  def process_waiter(popen, description, que):
+#    '''This needs to be replaced with something that allow
+#    '''
+#    try:
+#        popen.wait()
+#    finally:
+#        que.put( (description, popen.returncode) )
 
-def replace_mapped_drives(instr):
-    """This function replaces all instances of each stored drive letter
+#  def runCondorPythonJob(args, workspace, prefix, wholeMachine=False):
+#      #  replace all mappedDriveLetters in the argsDict with UNC paths
+#      global UNCDrives
+#      for item in args:
+#          args[args.index(item)] = replaceMappedDrives(item)
+#
+#      if prefix[0].isdigit():
+#          prefix = "_" + prefix
+#
+#      #  create submit file
+#          #  create condorSubmit file
+#      submitFname = os.path.join(workspace, prefix + "_CondorSubmit.txt")
+#      submitFile = open(submitFname, 'w')
+#      submitFile.write("Universe                = vanilla\n")
+#      submitFile.write("Executable              = c:\Windows\System32\cmd.exe\n")
+#      submitFile.write("run_as_owner            = true\n")
+#      submitFile.write("Getenv                  = true\n")
+#      submitFile.write("Should_transfer_files   = no\n")
+#      submitFile.write("transfer_executable     = false\n")
+#
+#      machines = ['igskbacbwsvis1', 'igskbacbwsvis2', 'igskbacbwsvis3', 'igskbacbwsvis4', 'igskbacbws3151a', 'igskbacbws425']
+#  #    machines = ['igskbacbwsvis3']
+#      reqsStr = 'Requirements            = (Machine == "'
+#      reqsStr += '.gs.doi.net" || Machine == "'.join(machines) + '.gs.doi.net")'
+#      if wholeMachine:
+#          reqsStr += "&& CAN_RUN_WHOLE_MACHINE\n"
+#          submitFile.write("+RequiresWholeMachine = True\n")
+#      else:
+#          reqsStr += "\n"
+#      submitFile.write(reqsStr)
+#
+#      stdErrFname = os.path.join(workspace, "ExpandedOutput", prefix + "_stdErr.txt")
+#      stdOutFname = os.path.join(workspace, "ExpandedOutput", prefix + "_stdOut.txt")
+#      logFname = os.path.join(workspace, "ExpandedOutput", prefix + "_log.txt")
+#      submitFile.write("Output                  = " + replaceMappedDrives(stdOutFname) + "\n")
+#      submitFile.write("error                   = " + replaceMappedDrives(stdErrFname) + "\n")
+#      submitFile.write("log                     = " + replaceMappedDrives(logFname) + "\n")
+#      argsStr = 'Arguments               = "/c pushd ' + "'"
+#      argsStr += "' '".join(args) + "'" + '"\n'
+#      argsStr = replaceMappedDrives(argsStr)
+#      argsStr = argsStr.replace(r"\python.exe'", "' && python.exe")
+#      submitFile.write(argsStr)
+#      submitFile.write("Notification            = Never\n")
+#      submitFile.write("Queue\n")
+#      submitFile.close()
+#
+#      curDir = os.getcwd()
+#      os.chdir(os.path.split(curDir)[0])
+#
+#      #  launch condor job
+#      DEVNULL = open(os.devnull, 'wb')
+#      p = subprocess.Popen(["condor_submit", "-n", 'IGSKBACBWSCDRS3', submitFname], stderr=DEVNULL, stdout=DEVNULL)
+#
+#      os.chdir(curDir)
+
+def replaceMappedDrives(inStr):
+    '''This function replaces all instances of each stored drive letter
     in the format  'i:\' with the full unc path.
     Caution should be used with this function, especially with long input
     strings as the combination could occur in other contexts.
-    """
-    global unc_drives
-    for drive in unc_drives.keys():
-        instr = instr.replace(drive.upper(), unc_drives[drive])
+    '''
+    global UNCDrives
+    for drive in UNCDrives.keys():
+        inStr = inStr.replace(drive.upper(), UNCDrives[drive])
 
-    return instr
+    return inStr
 
 
-def store_unc_drives():
-    """Condor jobs are run on remote computers which are dynamically logged into.
+def storeUNCDrives():
+    '''Condor jobs are run on remote computers which are dynamically logged into.
     Since this method does not map the the current users lettered drives we
     needed to implement a means of replacing the mapped drive letters in file names
-    with the fully qualified unc path (ie replacing i:\ with \\igskbacb...\)
+    with the fullly qualified unc path (ie replacing i:\ with \\igskbacb...\)
     To do this we run the storeUNCDrives once when the sahm package loads.
     This function parses the 'net use' windows command line utility output to
     extract and store the unc paths to all of the currently mapped unc drives.
-    """
-    global unc_drives
-    unc_drives = {}
+    '''
+    global UNCDrives
+    UNCDrives = {}
     try:
         ret = subprocess.Popen(["net", "use"], stdout=subprocess.PIPE,
                                universal_newlines=True).communicate()[0].split("\n")
@@ -176,34 +244,42 @@ def store_unc_drives():
             line = line.split()
             if line and line[0] in ["OK", "Disconnected"]:
                 if len(line) > 2 and \
-                        os.path.exists(line[2]):
-                    unc_drives[line[1].lower() + '\\'] = line[2] + "\\"
+                    os.path.exists(line[2]):
+                    UNCDrives[line[1].lower() + '\\'] = line[2] + "\\"
     except:
         #  this is only intended for Condor jobs running
-        #  at the Fort Collins Science Center.
+        #  at the Fort Collins Scienc Center.
         #  If this throws any error move along silently.
         pass
 
-
-def check_if_folder_is_on_network(dirname):
-    global unc_drives
-    if not os.path.splitdrive(dirname)[0].lower() + "\\" in unc_drives.keys():
-        QtGui.QMessageBox.critical(None, "Session folder error",
-                                   "For Fort Condor execution to work your session folder must be on a network drive." +
-                                   "\nCurrently this is set to:   " + dirname)
+def checkIfFolderIsOnNetwork(dirname):
+    global UNCDrives
+    if not os.path.splitdrive(dirname)[0].lower() + "\\" in UNCDrives.keys():
+        QtGui.QMessageBox.critical(None, "Session folder error", "For Fort Condor execution to work your session folder must be on a network drive." \
+            + "\nCurrently this is set to:   " + dirname)
         return False
     else:
         return True
 
+#  def waitForProcessesToFinish(processQueue, maxCount=1):
+#    '''Given a list of running processes and a maximum number of running processes
+#    this function waits for enough of the processes have finished to have
+#    the number of running jobs be less that the maximum number of jobs we want.
+#    '''
+#    while len(processQueue) > maxCount:
+#            time.sleep(1)
+#            for process in processQueue:
+#                if process.poll() is not None:
+#                    processQueue.remove(process)
 
-def get_process_count(str_processing_mode):
-    """The number of concurrently running jobs is dependent on the currently
+def get_process_count(strProcessingMode):
+    '''The number of concurrently running jobs is dependent on the currently
     selected processingMode.
     If on Condor then send them all and let Condor manage the Queue.
     else we will be running n-1 jobs (this function is only used by PARC now)
-    """
+    '''
 
-    if str_processing_mode == "multiple models simultaneously (1 core each)":
+    if strProcessingMode == "multiple models simultaneously (1 core each)":
         process_count = multiprocessing.cpu_count() - 1
     else:
         process_count = 1
@@ -213,25 +289,21 @@ def get_process_count(str_processing_mode):
 
     return process_count
 
-
-def get_models_path():
+def getModelsPath():
     return os.path.join(os.path.dirname(__file__), "Resources", "R_Modules")
-
 
 #  These three functions are used to manage the process pool
 def get_pool():
-    """The _pool is a global multiprocessing pool that is used to queue jobs
-    """
+    '''The _pool is a global multiprocessing pool that is used to queue jobs
+    '''
     global _process_pool
     return _process_pool
-
 
 def start_new_pool(processes=1):
     global _process_pool
     if _process_pool:
         _process_pool.terminate()
     _process_pool = multiprocessing.Pool(processes)
-
 
 def wait_for_pool_to_finish():
     global _process_pool
@@ -242,26 +314,24 @@ def wait_for_pool_to_finish():
     results = [process.get() for process in _pool_processes]
     return results
 
-
 def add_process_to_pool(worker, arglist):
-    """
-    """
+    '''
+    '''
     global _process_pool
     global _pool_processes
     _pool_processes.append(_process_pool.apply_async(worker, arglist))
 
-
 def convert_list_to_cmd_str(inlist):
-    """return a string equivalent to the command line used.
+    '''return a string equivalent to the command line used.
     notably it escapes quotes and wraps elements with spaces in double quotes.
-    """
-    out_list = []
+    '''
+    outlist = []
     for item in inlist:
         item = item.replace('"', '\"')
         if ' ' in item:
             item = '"' + item + '"'
-        out_list.append(item)
-    return " ".join(out_list)
+        outlist.append(item)
+    return " ".join(outlist)
 
 
 def launch_cmd(cmd, stdout_fname="", stderr_fname="", async=False):
@@ -286,10 +356,9 @@ def launch_cmd(cmd, stdout_fname="", stderr_fname="", async=False):
 
     stdErrFile.close()
     stdOutFile.close()
-    errmsg = "\n".join(open(stderr_fname, "r").readlines())
-    outmsg = "\n".join(open(stdout_fname, "r").readlines())
-    return outmsg, errmsg
-
+    errMsg = "\n".join(open(stderr_fname, "r").readlines())
+    outMsg = "\n".join(open(stdout_fname, "r").readlines())
+    return outMsg, errMsg
 
 #  these two functions were pulled from: http://code.activestate.com/recipes/577124-approximately-equal/
 def _float_approx_equal(x, y, tol=1e-18, rel=1e-7):
@@ -348,7 +417,6 @@ def approx_equal(x, y, *args, **kwargs):
     #  approximate equal comparison (or are both floats). Fall back to a numeric
     #  comparison.
     return _float_approx_equal(x, y, *args, **kwargs)
-
 
 #  taken from http://code.activestate.com/recipes/362715-dbf-reader-and-writer/
 def dbfreader(f):
@@ -465,9 +533,9 @@ def dbfwriter(f, fieldnames, fieldspecs, records):
     f.write('\x1A')
 
 def covariate_name_is_ok(covname):
-    """Checks if the passed string will work for a covariate name
+    '''Checks if the passed string will work for a covariate name
     Must start with a letter and not have any special characters except '.', '_'
-    """
+    '''
     if not covname[0].isalpha():
         return False
     if not covname.replace(".", "").replace("_", "").replace("\n", "").isalnum():
@@ -502,14 +570,12 @@ def checkIfModelFinished(model_dir):
     else:
         return "Running ..."
 
-
 def get_picklehash_fname(directory=""):
     global _roottempdir
     if directory == "":
         directory = _roottempdir
     fname = os.path.join(directory, "vt_hashmap.dat")
     return fname
-
 
 def write_hash_entry_pickle(hashname, fname, directory=""):
 
@@ -527,7 +593,6 @@ def write_hash_entry_pickle(hashname, fname, directory=""):
     with open(hash_fname, "wb") as f:
         pickle.dump(hash_dict, f)
 
-
 def delete_hash_entry_pickle(signature, directory=""):
 
     hash_fname = get_picklehash_fname(directory)
@@ -544,7 +609,6 @@ def delete_hash_entry_pickle(signature, directory=""):
     with open(hash_fname, "wb") as f:
         pickle.dump(hash_dict, f)
 
-
 def get_fname_from_hash_pickle(hashname, directory=""):
     global _roottempdir
     if directory == "":
@@ -559,7 +623,6 @@ def get_fname_from_hash_pickle(hashname, directory=""):
                 #  if anything goes wrong we'll just rerun it!
                 return None
     return None
-
 
 def hash_file(fname):
     h = sha_hash()
@@ -584,7 +647,6 @@ def hash_file(fname):
             h.update(str(fname))
     return h.hexdigest()
 
-
 def get_raster_files(raster_fname):
     if os.path.exists(os.path.join(raster_fname, "hdr.adf")):
         grid_folder = raster_fname
@@ -595,7 +657,6 @@ def get_raster_files(raster_fname):
 
     return [os.path.join(grid_folder, f) for f in os.listdir(grid_folder)
                                     if f.endswith(".adf")]
-
 
 def setrootdir(session_dir):
     global _roottempdir

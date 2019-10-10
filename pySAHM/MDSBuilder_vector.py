@@ -1,38 +1,45 @@
-#  -*- coding: latin-1 -*-
 ###############################################################################
-# This file is part of the Software for Assisted Habitat Modeling (SAHM) package
-# developed by the U.S. Geological Survey Fort Collins Science Center.
-# It is intended to be used in the VisTrails Scientific
-# VisTrails was developed by New York University (2014-2016), NYU-Poly (2011-2014),
-# University of Utah (2006-2011).  VisTrails Contact: contact@vistrails.org
-#
-# SAHM Contact: talbertc@usgs.gov
-#
-# --------------------------------------------------------------------------------
-# U.S. Geological Survey Disclaimers
-# Any use of trade, product or firm names is for descriptive purposes only and does
-# not imply endorsement by the U.S. Geological Survey.
-#
-# Although this information product, for the most part, is in the public domain,
-# it also contains copyrighted material as noted in the text. Permission to reproduce
-# copyrighted items for other than personal use must be secured from the copyright owner.
-#
-# Although these data have been processed successfully on a computer system at the
-# U.S. Geological Survey, no warranty, expressed or implied is made regarding the
-# display or utility of the data on any other system, or for general or scientific
-# purposes, nor shall the act of distribution constitute any such warranty. The
-# U.S. Geological Survey shall not be held liable for improper or incorrect use
-# of the data described and/or contained herein.
-#
-# Although this program has been used by the U.S. Geological Survey (USGS), no
-# warranty, expressed or implied, is made by the USGS or the U.S. Government as
-# to the accuracy and functioning of the program and related program material nor
-# shall the fact of distribution constitute any such warranty, and no responsibility
-# is assumed by the USGS in connection therewith.
-# --------------------------------------------------------------------------------
-#
-# This code is in the public domain and is licensed under Creative Commons CC0 1.0 Universal
-#
+##
+## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
+## All rights reserved.
+## Contact: talbertc@usgs.gov
+##
+## This file is part of the Software for Assisted Habitat Modeling package
+## for VisTrails.
+##
+## "Redistribution and use in source and binary forms, with or without 
+## modification, are permitted provided that the following conditions are met:
+##
+##  - Redistributions of source code must retain the above copyright notice, 
+##    this list of conditions and the following disclaimer.
+##  - Redistributions in binary form must reproduce the above copyright 
+##    notice, this list of conditions and the following disclaimer in the 
+##    documentation and/or other materials provided with the distribution.
+##  - Neither the name of the University of Utah nor the names of its 
+##    contributors may be used to endorse or promote products derived from 
+##    this software without specific prior written permission.
+##
+## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+## AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
+## THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+## PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+## OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+## OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+##
+## Although this program has been used by the U.S. Geological Survey (USGS), 
+## no warranty, expressed or implied, is made by the USGS or the 
+## U.S. Government as to the accuracy and functioning of the program and 
+## related program material nor shall the fact of distribution constitute 
+## any such warranty, and no responsibility is assumed by the USGS 
+## in connection therewith.
+##
+## Any use of trade, firm, or product names is for descriptive purposes only 
+## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
 import sys
@@ -52,11 +59,11 @@ import utilities
 #from Utilities import self.writetolog
 
 class MDSBuilder_vector(object):
-    """Takes a shapefile or other vector file and iterates through
+    '''Takes a shapefile or other vector file and iterates through
     the unique geometries specified in a certain field.  
     Extracting out min, max, mean or majority for each of the input covariates.
     Outputs a csv with this info
-    """
+    '''
     def __init__(self):
         #instance level variables
         self.verbose = False
@@ -98,13 +105,13 @@ class MDSBuilder_vector(object):
             raise RuntimeError, "The directory of the supplied MDS output file path, " + self.outputMDS +", does not appear to exist on the filesystem"
         
         if self.logger is None:
-            self.logger = utilities.Logger(outDir, self.verbose)
-        self.writetolog = self.logger.write_to_log
+            self.logger = utilities.logger(outDir, self.verbose)  
+        self.writetolog = self.logger.writetolog
             
     def run(self):
-        """
+        '''
         This routine loops through a set of rasters and creates an MDS file
-        """
+        '''
         
         self.validateArgs()
         self.writetolog('\nRunning MDSBuilder_vector', True, True)
@@ -236,9 +243,9 @@ class MDSBuilder_vector(object):
             self.writetolog('    The process took ' + str(endTime - startTime) + ' seconds')
         
     def reproject_input_vector(self):
-        """reprojects our input vector shapefile into the projection
+        '''reprojects our input vector shapefile into the projection 
         used by PARC.  Uses the first file from the parc input csv.
-        """
+        '''
         output_dir = os.path.split(self.outputMDS)[0]
         out_fname = os.path.split(self.VectorFieldData)[1]
         out_fname, ext = os.path.splitext(out_fname)
@@ -249,8 +256,8 @@ class MDSBuilder_vector(object):
         self.reproject_vector(self.VectorFieldData, self.repro_vector, self.inputs[0])
             
     def reproject_vector(self, VectorFieldData, output_vector, template):
-        """originally taken from http://www.gis.usu.edu/~chrisg/python/2009/lectures/ospy_hw2b.py
-        """
+        '''originally taken from http://www.gis.usu.edu/~chrisg/python/2009/lectures/ospy_hw2b.py
+        '''
         # get the shapefile driver
         driver = ogr.GetDriverByName('ESRI Shapefile')
         
@@ -345,10 +352,10 @@ class MDSBuilder_vector(object):
         file.close()
         
     def constructEmptyMDS(self):
-        """Creates the triple header line format of our output file.
+        '''Creates the triple header line format of our output file.
         Also parses the inputs file to append the '_categorical' flag 
         to the covariate names of all categorical inputs.
-        """
+        '''        
         
 #        field_data_CSV = csv.reader(open(self.fieldData, "r"))
 #        orig_header = field_data_CSV.next()
@@ -433,9 +440,9 @@ class MDSBuilder_vector(object):
         del fOut
     
     def readInPoints(self):
-        """Loop through each row in our field data and add the X, Y, response
+        '''Loop through each row in our field data and add the X, Y, response
         to our in memory list of rows to write to our output MDS file
-        """
+        '''
         
         # get the driver
         driver = ogr.GetDriverByName('ESRI Shapefile')
@@ -460,11 +467,11 @@ class MDSBuilder_vector(object):
         return uniques
     
     def addBackgroundPoints(self):
-        """Add pointcount number of points to the supplied field data
+        '''Add pointcount number of points to the supplied field data
         If a probability surface was provided the distribution will 
         follow this otherwise it will be uniform within the extent of the first of our inputs.
         No more than one per pixel is used.
-        """
+        '''
         
         if self.pointtype == 'Background':
             pointval = '-9999'
@@ -574,9 +581,9 @@ class MDSBuilder_vector(object):
         return rasters
     
     def isRaster(self, filePath):
-        """Verifies that a pased file and path is recognized by
+        '''Verifies that a pased file and path is recognized by
         GDAL as a raster file.
-        """
+        '''
         try:
             dataset = gdal.Open(filePath, gdalconst.GA_ReadOnly)
             if dataset is None:

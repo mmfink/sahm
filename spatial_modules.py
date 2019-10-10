@@ -1,38 +1,45 @@
-#  -*- coding: latin-1 -*-
 ###############################################################################
-# This file is part of the Software for Assisted Habitat Modeling (SAHM) package
-# developed by the U.S. Geological Survey Fort Collins Science Center.
-# It is intended to be used in the VisTrails Scientific
-# VisTrails was developed by New York University (2014-2016), NYU-Poly (2011-2014),
-# University of Utah (2006-2011).  VisTrails Contact: contact@vistrails.org
-#
-# SAHM Contact: talbertc@usgs.gov
-#
-# --------------------------------------------------------------------------------
-# U.S. Geological Survey Disclaimers
-# Any use of trade, product or firm names is for descriptive purposes only and does
-# not imply endorsement by the U.S. Geological Survey.
-#
-# Although this information product, for the most part, is in the public domain,
-# it also contains copyrighted material as noted in the text. Permission to reproduce
-# copyrighted items for other than personal use must be secured from the copyright owner.
-#
-# Although these data have been processed successfully on a computer system at the
-# U.S. Geological Survey, no warranty, expressed or implied is made regarding the
-# display or utility of the data on any other system, or for general or scientific
-# purposes, nor shall the act of distribution constitute any such warranty. The
-# U.S. Geological Survey shall not be held liable for improper or incorrect use
-# of the data described and/or contained herein.
-#
-# Although this program has been used by the U.S. Geological Survey (USGS), no
-# warranty, expressed or implied, is made by the USGS or the U.S. Government as
-# to the accuracy and functioning of the program and related program material nor
-# shall the fact of distribution constitute any such warranty, and no responsibility
-# is assumed by the USGS in connection therewith.
-# --------------------------------------------------------------------------------
-#
-# This code is in the public domain and is licensed under Creative Commons CC0 1.0 Universal
-#
+#  #
+#  # Copyright (C) 2010-2012, USGS Fort Collins Science Center.
+#  # All rights reserved.
+#  # Contact: talbertc@usgs.gov
+#  #
+#  # This file is part of the Software for Assisted Habitat Modeling package
+#  # for VisTrails.
+#  #
+#  # "Redistribution and use in source and binary forms, with or without
+#  # modification, are permitted provided that the following conditions are met:
+#  #
+#  #  - Redistributions of source code must retain the above copyright notice,
+#  #    this list of conditions and the following disclaimer.
+#  #  - Redistributions in binary form must reproduce the above copyright
+#  #    notice, this list of conditions and the following disclaimer in the
+#  #    documentation and/or other materials provided with the distribution.
+#  #  - Neither the name of the University of Utah nor the names of its
+#  #    contributors may be used to endorse or promote products derived from
+#  #    this software without specific prior written permission.
+#  #
+#  # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+#  # THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#  # PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+#  # CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  # EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  # PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+#  # OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+#  # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+#  # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+#  # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+#  #
+#  # Although this program has been used by the U.S. Geological Survey (USGS),
+#  # no warranty, expressed or implied, is made by the USGS or the
+#  # U.S. Government as to the accuracy and functioning of the program and
+#  # related program material nor shall the fact of distribution constitute
+#  # any such warranty, and no responsibility is assumed by the USGS
+#  # in connection therewith.
+#  #
+#  # Any use of trade, firm, or product names is for descriptive purposes only
+#  # and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
 ################################################################################
@@ -332,17 +339,17 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.update()
 
     def set_raster_base(self, raster_kwargs):
-        """The raster being displayed sets the data_max extent and projection for our
+        '''The raster being displayed sets the data_max extent and projection for our
         map.  There can be only one and switching it requires recreating the
         whole shooting match. Set it up here
-        """
+        '''
         self.rasterdisplay_layer = RasterDisplay()
         self.rasterdisplay_layer.setDims(self.axes)
         self.rasterdisplay_layer.switch_raster(raster_kwargs)
 
     def display_raster(self, xlim, ylim):
-        """refresh the given raster
-        """
+        '''refresh the given raster
+        '''
 
         xlim_clip = list(np.clip(xlim, self.rasterdisplay_layer.raster.west, self.rasterdisplay_layer.raster.east))
         ylim_clip = list(np.clip(ylim, self.rasterdisplay_layer.raster.south, self.rasterdisplay_layer.raster.north))
@@ -506,9 +513,9 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         self.axes.get_yaxis().set_visible(False)
 
     def add_states(self):
-        """Add simplified state boundaries to the output map
+        '''Add simplified state boundaries to the output map
         The file that we're displaying is stored in the sahm/data/
-        """
+        '''
         sahm_dir = os.path.dirname(os.path.abspath(__file__))
         shp_fname = os.path.join(sahm_dir, "data", "states_110m", "ne_110m_admin_1_states_provinces_lakes.shp")
 
@@ -516,8 +523,8 @@ class SpatialViewerCellWidgetBase(QCellWidget):
                             alpha=0.8, display_all=True)
 
     def add_poly_layer(self, layer_fname, display_all=False, **kwargs):
-        """add a polygon layer file to our map
-        """
+        '''add a polygon layer file to our map
+        '''
         raster_crs = osr.SpatialReference()
         raster_crs.ImportFromWkt(self.rasterdisplay_layer.raster.ds.GetProjection())
 
@@ -558,9 +565,9 @@ class SpatialViewerCellWidgetBase(QCellWidget):
             self.axes.add_collection(pc)
 
     def parse_query(self, query_string):
-        """given a string in standard ESRI query format returns a function that
+        '''given a string in standard ESRI query format returns a function that
         returns true or false if a fiona record matches that query string
-        """
+        '''
         try:
             for typo in ["> =", "< =", "< >"]:
                 query_string = query_string.replace(typo, typo.replace(" ", ""))
@@ -581,8 +588,8 @@ class SpatialViewerCellWidgetBase(QCellWidget):
                 query_string = query_string.replace('"' + col_name + '"', "rec['properties']['" + col_name + "']")
 
             def query_function(rec):
-                """the function we will be returning
-                """
+                '''the function we will be returning
+                '''
                 try:
                     return eval(query_string)
                 except KeyError, e:
@@ -601,8 +608,8 @@ class SpatialViewerCellWidgetBase(QCellWidget):
             raise ModuleError(self, msg)
 
     def get_patches(self, geom, shape_proj, raster_proj, shift360=False):
-        """returns a list of all the patches in the passed geometry
-        """
+        '''returns a list of all the patches in the passed geometry
+        '''
         patches = []
         if geom['type'] == 'Polygon':
             trans_ring = np.asarray(zip(*transform(shape_proj, raster_proj, *zip(*geom['coordinates'][0]))))
@@ -624,8 +631,8 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         return patches
 
     def add_point_layer(self, layer_fname, **kwargs):
-        """add a polygon layer file to our map
-        """
+        '''add a polygon layer file to our map
+        '''
         raster_crs = osr.SpatialReference()
         raster_crs.ImportFromWkt(self.rasterdisplay_layer.raster.ds.GetProjection())
 
@@ -790,8 +797,8 @@ class SpatialViewerCellWidgetBase(QCellWidget):
         cell.set_extent((x0t, x1t), (y0t, y1t))
 
 class SpatialViewerCellWidget(SpatialViewerCellWidgetBase):
-    """
-    """
+    '''
+    '''
     def set_toolbars(self):
         self.toolBarType = GeneralSpatialViewerToolBar
         self.controlBarType = GeneralSpatialViewerToolBar
@@ -824,8 +831,8 @@ class ViewLayerAction(QtGui.QAction):
         self.toolBar.updateToolBar()
 
     def toggleOthers(self):
-        """Unselect the other raster or vector layers
-        """
+        '''Unselect the other raster or vector layers
+        '''
         for action in self.toolBar.actions():
             if "group" in dir(action) and \
                 action.group == self.group and \
@@ -833,9 +840,9 @@ class ViewLayerAction(QtGui.QAction):
                 action.setChecked(False)
 
     def displayLayer(self):
-        """Display all the layers that have their
+        '''Display all the layers that have their
         actions selected in the toolbar
-        """
+        '''
         cellWidget = self.toolBar.getSnappedWidget()
         active_cells = cellWidget.get_active_cells()
 
@@ -899,17 +906,17 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
         self.add_other_actions()
 
     def add_layers_actions(self):
-        """add the actions (buttons) associated with turning layers on and off
-        """
+        '''add the actions (buttons) associated with turning layers on and off
+        '''
         lyrs_label = QtGui.QLabel()
         lyrs_label.setText("Layers:")
         self.appendWidget(lyrs_label)
         self.appendAction(ViewStateBoundariesButton(self))
 
     def add_nav_actions(self):
-        """Add the actions(buttons) associated with map navigation
+        '''Add the actions(buttons) associated with map navigation
         i.e. zoom, pan, extents
-        """
+        '''
         self.addSeparator()
         nav_label = QtGui.QLabel()
         nav_label.setText("  Navigation:")
@@ -932,9 +939,9 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
             self.appendAction(MPLButton(action_dict, self))
 
     def add_other_actions(self):
-        """Add the actions(buttons) associated with map navigation
+        '''Add the actions(buttons) associated with map navigation
         i.e. zoom, pan, extents
-        """
+        '''
         self.addSeparator()
         other_label = QtGui.QLabel()
         other_label.setText("  Other:")
@@ -985,12 +992,12 @@ class GeneralSpatialViewerToolBar(QCellToolBar):
         return popmenu
 
 class SyncChangesButton(QtGui.QAction):
-    """A toolbar button that allows users to choose which other cells will
+    '''A toolbar button that allows users to choose which other cells will
     follow the extent, and other changes made to this cell
     options all = all spatial cells will be updated
             sel = only the selected cells will be updated
             one = only this cell will be updated
-    """
+    '''
 
     def __init__(self, parent=None):
         self.sync_options = itertools.cycle(["all", "sel", "one"])
@@ -1015,12 +1022,12 @@ class SyncChangesButton(QtGui.QAction):
         cellWidget.SyncChangesButton = next_option
 
 class showColorbarButton(QtGui.QAction):
-    """A toolbar button that allows users to choose which other cells will
+    '''A toolbar button that allows users to choose which other cells will
     follow the extent, and other changes made to this cell
     options all = all spatial cells will be updated
             sel = only the selected cells will be updated
             one = only this cell will be updated
-    """
+    '''
 
     def __init__(self, parent=None):
         icon = os.path.abspath(os.path.join(
@@ -1042,8 +1049,8 @@ class showColorbarButton(QtGui.QAction):
             cell.on_draw()
 
 class FullExtentButton(QtGui.QAction):
-    """The button used to go the the full extent (of the raster being displayed)
-    """
+    '''The button used to go the the full extent (of the raster being displayed)
+    '''
     def __init__(self, parent=None):
         icon = os.path.abspath(os.path.join(
                     os.path.dirname(__file__), "data", "Images", "world.png"))
@@ -1058,10 +1065,10 @@ class FullExtentButton(QtGui.QAction):
         cellWidget.zoomFull()
 
 class MPLButton(QtGui.QAction):
-    """A button that is used to replace the built in matplotlib chart buttons
+    '''A button that is used to replace the built in matplotlib chart buttons
     This allows us to change the icons, tooltips, etc. as well as get them
     to interact with our particular charts as we need
-    """
+    '''
 
     def __init__(self, action_dict, parent=None):
         icon = os.path.abspath(os.path.join(
@@ -1149,9 +1156,9 @@ class RasterLayer(Module):
         self.setResult('display_dict', self.args_dict)
 
 class VectorLayer(Module):
-    """Base class for VisTrails modules that represent a geospatial layer
+    '''Base class for VisTrails modules that represent a geospatial layer
     that can be added to a GeneralSpatialViewerCell as an overlay to a RasterFile
-    """
+    '''
     _input_ports = [('input_file', '(edu.utah.sci.vistrails.basic:File)', {'optional':True}),
                     ('line_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':True}),
                     ('fill_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':True}),
@@ -1214,8 +1221,8 @@ class PolyLayer(VectorLayer):
         VectorLayer.compute(self)
 
 class LineLayer(VectorLayer):
-    """A vector file with polygon or multi-polygon geometry
-    """
+    '''A vector file with polygon or multi-polygon geometry
+    '''
     _input_ports = list(VectorLayer._input_ports)
     _input_ports.remove(('fill_color', '(edu.utah.sci.vistrails.basic:Color)', {'optional':True}))
 
@@ -1224,8 +1231,8 @@ class LineLayer(VectorLayer):
         VectorLayer.compute(self)
 
 class MyMapCanvas(FigureCanvas):
-    """a hack to get a FigureCanvas not to resize when it's size is 0
-    """
+    '''a hack to get a FigureCanvas not to resize when it's size is 0
+    '''
     def __init__(self, fig):
         FigureCanvas.__init__(self, fig)
 
@@ -1235,7 +1242,7 @@ class MyMapCanvas(FigureCanvas):
             FigureCanvas.resizeEvent(self, event)
 
 class RasterDisplay(object):
-    """The idea behind this is from
+    '''The idea behind this is from
     http://matplotlib.sourceforge.net/examples/event_handling/viewlims.py
     basically we want to only query as much data as we have screen pixels for.
     When the user zooms, pans, resizes we'll go back to the original display
@@ -1243,7 +1250,7 @@ class RasterDisplay(object):
 
     This object has a pointer to the original raster and functions
     for switching the input file or getting an array of pixel values
-    """
+    '''
     def __init__(self, width=300, height=300):
         self.height = height
         self.width = width
@@ -1253,9 +1260,9 @@ class RasterDisplay(object):
 
 
     def switch_raster(self, raster_kwargs):
-        """A new raster fname was provided
+        '''A new raster fname was provided
         update the instance variables accordingly
-        """
+        '''
         self.kwargs = raster_kwargs
         self.raster = SpatialUtilities.SAHMRaster(raster_kwargs['raster_file'])
 
@@ -1273,9 +1280,9 @@ class RasterDisplay(object):
         self.cmap = raster_kwargs.get("cmap", matplotlib.cm.jet)
 
     def __call__(self, xlim, ylim):
-        """this function is called whenever the view updates
+        '''this function is called whenever the view updates
         We pull new pixels from our raster as needed
-        """
+        '''
 
         #  reel these values in if they are outside our bounds
         xstart, xend = np.clip(xlim, self.raster.west, self.raster.east)
