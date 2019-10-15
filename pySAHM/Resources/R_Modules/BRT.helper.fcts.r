@@ -1,44 +1,44 @@
 ###############################################################################
 ##
-## Copyright (C) 2010-2012, USGS Fort Collins Science Center. 
+## Copyright (C) 2010-2012, USGS Fort Collins Science Center.
 ## All rights reserved.
 ## Contact: talbertc@usgs.gov
 ##
 ## This file is part of the Software for Assisted Habitat Modeling package
 ## for VisTrails.
 ##
-## "Redistribution and use in source and binary forms, with or without 
+## "Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions are met:
 ##
-##  - Redistributions of source code must retain the above copyright notice, 
+##  - Redistributions of source code must retain the above copyright notice,
 ##    this list of conditions and the following disclaimer.
-##  - Redistributions in binary form must reproduce the above copyright 
-##    notice, this list of conditions and the following disclaimer in the 
+##  - Redistributions in binary form must reproduce the above copyright
+##    notice, this list of conditions and the following disclaimer in the
 ##    documentation and/or other materials provided with the distribution.
-##  - Neither the name of the University of Utah nor the names of its 
-##    contributors may be used to endorse or promote products derived from 
+##  - Neither the name of the University of Utah nor the names of its
+##    contributors may be used to endorse or promote products derived from
 ##    this software without specific prior written permission.
 ##
-## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-## AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
-## THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
-## PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
-## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
-## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
-## OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-## OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+## AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+## THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+## PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+## CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+## EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+## PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+## OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+## OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
 ##
-## Although this program has been used by the U.S. Geological Survey (USGS), 
-## no warranty, expressed or implied, is made by the USGS or the 
-## U.S. Government as to the accuracy and functioning of the program and 
-## related program material nor shall the fact of distribution constitute 
-## any such warranty, and no responsibility is assumed by the USGS 
+## Although this program has been used by the U.S. Geological Survey (USGS),
+## no warranty, expressed or implied, is made by the USGS or the
+## U.S. Government as to the accuracy and functioning of the program and
+## related program material nor shall the fact of distribution constitute
+## any such warranty, and no responsibility is assumed by the USGS
 ## in connection therewith.
 ##
-## Any use of trade, firm, or product names is for descriptive purposes only 
+## Any use of trade, firm, or product names is for descriptive purposes only
 ## and does not imply endorsement by the U.S. Government.
 ###############################################################################
 
@@ -53,7 +53,7 @@ est.lr <- function(out){
     t0 <- unclass(Sys.time())
     # set tree complexity for full-data run #
     a<-2.69; b<-0.0012174
-   
+
     if(is.null(out$mods$parms$tc.full)) out$mods$parms$tc.full<-min(round(a+b*nrow(out$dat$ma$train$dat)),20) # this gives 3 for n=250
     if(is.null(out$mods$parms$tc.sub)){
         n <- nrow(out$dat$Subset$dat)  # this gives 3 for n=250
@@ -72,7 +72,7 @@ est.lr <- function(out){
 
     max.trees <- 0
     i=1
-    
+
     while(max.trees<800 & i<=nrow(lr.out)){
       gbm.fit <- gbm.step.fast(dat=dat,
           gbm.x = gbm.x,
@@ -86,7 +86,7 @@ est.lr <- function(out){
           site.weights=out$dat$Subset$weight,
           autostop=T,verbose=F,silent=T,plot.main=F)
           print(gbm.fit$target.trees)
-       lr.out$cv.dev[i]<-gbm.fit$cv.statistics$deviance.mean   
+       lr.out$cv.dev[i]<-gbm.fit$cv.statistics$deviance.mean
        lr.out$max.trees[i] <- max.trees <- gbm.fit$target.trees
        assign(paste("gbm.fit",i,sep="_"),gbm.fit)
        cat("lr =",lrs[i],"  optimal n trees =",max.trees,"\n");flush.console()
@@ -115,7 +115,7 @@ est.lr <- function(out){
     if(!is.null(out$input$learning.rate)) {out$mods$lr.mod$lr0=out$input$learning.rate
        out$mods$lr.mod$lr=out$input$learning.rate
     }
-    
+
     return(out$mods)
     }
 
@@ -228,7 +228,7 @@ gbm.step.fast <- function(
   assign("y.data", y.data, env = globalenv())
   offset.name <- deparse(substitute(offset))   # get the dataframe name
   offset = eval(offset)
-  
+
   n.cases <- nrow(dat)
   n.preds <- length(gbm.x)
 
@@ -437,12 +437,12 @@ gbm.step.fast <- function(
           training.loss.matrix[i,j] <- calc.deviance(y_i, u_i, weight.fitted, family = family)
 
     # calc holdout deviance
-        
+
           u_i <- pred.values[pred.mask]
           y_i <- y.data[pred.mask]
           weight.preds <- site.weights[pred.mask]
           cv.loss.matrix[i,j] <- calc.deviance(y_i, u_i, weight.preds, family = family)
-           
+
         }  # end of inner loop
 
         cv.loss.values <- apply(cv.loss.matrix,2,mean)
@@ -534,7 +534,7 @@ if(abs(target.trees-1000) >= 600 & superfast==T){         # AKS
 
   fitted.matrix <- matrix(NA, nrow = n.cases, ncol = n.folds)   #used to calculate se's
   fold.fit <- rep(0,n.cases)
-    
+
   for (i in 1:n.folds) {
 
     pred.mask <- selector == i   #used to identify the with-held subset
