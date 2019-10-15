@@ -580,16 +580,16 @@ if(abs(target.trees-1000) >= 600 & superfast==T){         # AKS
   cv.dev.se <- sqrt(var(cv.deviance.stats)) / sqrt(n.folds)
 
   cv.cor <- mean(cv.cor.stats, na.rm = TRUE)
-  cv.cor.se <- sqrt(var(cv.cor.stats, use = "complete.obs")) / sqrt(n.folds)
+  cv.cor.se <- sqrt(var(cv.cor.stats, use = "na.or.complete")) / sqrt(n.folds) #MMF - hack instead of error trapping. was "complete.obs"
 
   cv.roc <- 0.0
   cv.roc.se <- 0.0
 
   if (family == "bernoulli") {
     cv.roc <- mean(cv.roc.stats,na.rm=TRUE)
-    cv.roc.se <- sqrt(var(cv.roc.stats, use = "complete.obs")) / sqrt(n.folds)
+    cv.roc.se <- sqrt(var(cv.roc.stats, use = "na.or.complete")) / sqrt(n.folds) #MMF
     cv.threshold <- mean(threshold.stats, na.rm = T)
-    cv.threshold.se <- sqrt(var(threshold.stats, use = "complete.obs")) / sqrt(n.folds)
+    cv.threshold.se <- sqrt(var(threshold.stats, use = "na.or.complete")) / sqrt(n.folds) #MMF
   }
 
   cv.calibration <- 0.0
