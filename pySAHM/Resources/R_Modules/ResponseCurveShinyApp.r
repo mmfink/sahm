@@ -102,8 +102,11 @@ for(w in 1:length(wsLst)){
 }
 
 if(file.exists(mapLst[[1]])){
-  mapStk<<-stack(mapLst)
-  stk<-stack(rastLst)
+  nc <- (parallel::detectCores()) - 2
+  beginCluster(nc)
+  mapStk<<-stack(mapLst, quick=TRUE)
+  stk<-stack(rastLst, quick=TRUE)
+  endCluster()
 }
 
 
