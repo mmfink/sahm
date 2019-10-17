@@ -91,7 +91,7 @@
       xy.cols <- na.omit(c(match("x",tolower(names(dat))),match("y",tolower(names(dat)))))
       if(length(xy.cols)>0)  {
           rm.list<-c(rm.list,xy.cols)
-          out$input$ResidMaps=TRUE
+          out$input$ResidMaps=FALSE #MMF temp hack FIXME: make this a user option
       } else {  #turn off all maps in case the user didn't
           out$input$make.p.tif=FALSE
           out$input$make.binary.tif=FALSE
