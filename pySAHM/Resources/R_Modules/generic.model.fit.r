@@ -156,7 +156,7 @@ on.exit(detach(out$input))
 
          txt0 <- paste("\n\n","Settings:",
                        "\n\trandom seed used                       : ",out$input$seed,
-              "\n\tn covariates considered at each split  : ", mean(unlist(lapply(out$mods$final.mod,"[",14))),
+                       "\n\tn covariates considered at each split  : ", mean(unlist(lapply(out$mods$final.mod,"[",12), use.names = F)),
                        if(out$input$PsdoAbs==TRUE) "\n\t   (averaged over each used available split)\n",
                        "\n\tn trees                                : ",n.trees,
                        if(out$input$PsdoAbs==TRUE) "\n\t   (for each used available split)\n",
