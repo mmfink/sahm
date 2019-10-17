@@ -4,6 +4,7 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
 #in the generic model fit so that I can use the same simple function call for cross-validation and generic
 #model fit.  Written by Marian Talbert June 30th 2012
 
+  nc <- (parallel::detectCores()) - 2 #MMF right now only used for RF
   suppressMessages(attach(out$input))
   on.exit(detach(out$input))
 #================================================================
@@ -210,6 +211,9 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
      rf.full<-list()
      mtry.vect<-vector()
 
+     cl <- parallel::makeCluster(nc, type = "PSOCK")
+     registerDoParallel(cl)
+
      for(i in 1:length(table(Split))){
        # tune the mtry parameter - this controls the number of covariates randomly subset for each split #
        cat("\ntuning mtry parameter\n")
@@ -222,17 +226,32 @@ model.fit<-function(dat,out,Model,full.fit=FALSE,pts=NULL,weight=NULL,Fold,...){
                        replace=FALSE, doBest=F, plot=F)
          mtry.vect[i] <- mtr[mtr[,2]==min(mtr[,2]),1][1]
          t2 <- unclass(Sys.time())
-       } else mtry.vect[i]<-mtry
-       cat("\nnow fitting full random forest model using mtry=",mtry,"\n")
-       #
-       rf.full[[i]] <- randomForest(x=x,y=y,xtest=xtest,ytest=ytest,importance=TRUE, ntree=n.trees,
-                                    mtry=mtry.vect[i],replace=samp.replace,sampsize=ifelse(is.null(sampsize),(ifelse(samp.replace,nrow(x),ceiling(.632*nrow(x)))),sampsize),
-                                    nodesize=ifelse(is.null(nodesize),(if (!is.null(y) && !is.factor(y)) 5 else 1),nodesize),maxnodes=maxnodes,
-                                    localImp=localImp, nPerm=nPerm, keep.forest=ifelse(is.null(keep.forest),!is.null(y) && is.null(xtest),keep.forest),
-                                    corr.bias=corr.bias, keep.inbag=keep.inbag)
+       } else {mtry.vect[i]<-mtry}
+       cat("\nnow fitting full random forest model using mtry = ",mtry.vect[i],"\n")
+       # MMF 10/17/2019
+       # rf.full[[i]] <- randomForest(x=x,y=y,xtest=xtest,ytest=ytest,importance=TRUE, ntree=n.trees,
+       #                              mtry=mtry.vect[i],replace=samp.replace,sampsize=ifelse(is.null(sampsize),(ifelse(samp.replace,nrow(x),ceiling(.632*nrow(x)))),sampsize),
+       #                              nodesize=ifelse(is.null(nodesize),(if (!is.null(y) && !is.factor(y)) 5 else 1),nodesize),maxnodes=maxnodes,
+       #                              localImp=localImp, nPerm=nPerm, keep.forest=ifelse(is.null(keep.forest),!is.null(y) && is.null(xtest),keep.forest),
+       #                              corr.bias=corr.bias, keep.inbag=keep.inbag)
+       rf.full[[i]] <- foreach(trees = rep(tree.sub,nc),
+                               .combine = randomForest::combine,
+                               .packages = c("randomForest"),
+                               .multicombine = TRUE,
+                               .export = c("i","x","y","xtest","ytest","mtry.vect","samp.replace","sampsize","nodesize","maxnodes",
+                                           "localImp","nPerm","keep.forest","keep.inbag")) %dopar% {
+                               randomForest(x=x,y=y,xtest=xtest,ytest=ytest,importance=TRUE, ntree=trees,
+                                    mtry=mtry.vect[i],replace=samp.replace,
+                                    sampsize=ifelse(is.null(sampsize),(ifelse(samp.replace,nrow(x),ceiling(.632*nrow(x)))),sampsize),
+                                    nodesize=ifelse(is.null(nodesize),(if (!is.null(y) && !is.factor(y)) 5 else 1),nodesize),
+                                    maxnodes=maxnodes, localImp=localImp, nPerm=nPerm,
+                                    keep.forest=ifelse(is.null(keep.forest),!is.null(y) && is.null(xtest),keep.forest),
+                                    corr.bias=FALSE, keep.inbag=keep.inbag)
+                               }
        if(i==1)model.summary<-importance(rf.full[[i]])
        else model.summary<-model.summary+importance(rf.full[[i]])
      }
+     stopCluster(cl)
      n.pres<-sum(dat$response==1)
      out$mods$parms$mtry=mean(unlist(lapply(rf.full,FUN=function(lst){lst$mtry})))
      #Reduce("combine",rf.full)

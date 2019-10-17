@@ -135,8 +135,8 @@ proc.tiff<- function(model,vnames,tif.dir=NULL,filenames=NULL,factor.levels=NA,m
     if((nvars-length(FactorInd))==0) MESS<-MOD<-FALSE #turn this off if only one factor column was selected
 
   #for debugging I'm always using multiple cores
-  # multCore<-multCore
-  if(tr$n<10 | getRversion()<2.14) multCore<-FALSE #turn off multicore in certian circumstances
+  multCore <- TRUE
+  #if(tr$n<10 | getRversion()<2.14) multCore<-FALSE #turn off multicore in certian circumstances
 
   if(multCore){
       library(parallel)

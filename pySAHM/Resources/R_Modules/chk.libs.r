@@ -54,7 +54,7 @@ chk.libs <- function(Model){
      if(Model=="udc")                libs<-as.list(c("rjson",libs))
      if(Model=="mars")               libs<-as.list(c("mda","earth","plotrix",libs))
      if(Model%in%c("glm","maxent"))  libs<-as.list(libs)
-     if(Model=="rf")                 libs<-as.list(c("randomForest",libs))
+     if(Model=="rf")                 libs<-as.list(c("randomForest","doParallel","foreach",libs))
      if(Model=="gam")                libs<-as.list(c("gam",libs))
      if(Model=="ann")                libs<-as.list(c("nnet",libs))
      if(Model=="brt")                libs<-as.list(c("lattice","gbm",libs))
