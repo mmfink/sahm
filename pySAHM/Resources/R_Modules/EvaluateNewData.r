@@ -125,7 +125,7 @@ EvaluateNewData<-function(workspace=NULL,out.dir=NULL,b.tif=TRUE,p.tif=TRUE,mess
                           #producing auc and residual plots model summary information and accross model evaluation metric
                        out$dat$bnameExpanded=file.path(dirname(out$dat$bname),"ExpandedOutput")
                        assign("out",out,envir=.GlobalEnv)
-                       dir.create(out$dat$bnameExpanded)
+                       if(!file.exists(out$dat$bnameExpanded)){dir.create(out$dat$bnameExpanded)}
                        predsForOut<-cbind(resp=out$dat$ma$test$resp,pred=out$dat$ma$test$pred)
                        write.csv(predsForOut,file.path(out$dat$bnameExpanded,"predicted.csv"))
 

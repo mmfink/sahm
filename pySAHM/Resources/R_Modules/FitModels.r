@@ -45,7 +45,7 @@
 
 options(error=NULL)
 
-FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=TRUE,script.name,make.p.tif=TRUE,make.binary.tif=TRUE,...){
+FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=FALSE,script.name,make.p.tif=TRUE,make.binary.tif=TRUE,...){
 
        Call<-match.call()
     # This function fits a generic model to presence-pseudoabsence, presence-absence or count data.
@@ -102,7 +102,7 @@ FitModels <- function(ma.name,tif.dir=NULL,output.dir=NULL,debug.mode=TRUE,scrip
 
              out$dat$bname <- bname
              out$dat$bnameExpanded=file.path(dirname(out$dat$bname),"ExpandedOutput")
-             dir.create(out$dat$bnameExpanded)
+             if(!file.exists(out$dat$bnameExpanded)){dir.create(out$dat$bnameExpanded)}
              if(out$input$script.name=="rf" & out$input$model.family=="poisson") stop("Random Forest not implemented for count data")
              options(warn=-1)
    #writing out the header info to the CSV so in case of a break we know what broke
